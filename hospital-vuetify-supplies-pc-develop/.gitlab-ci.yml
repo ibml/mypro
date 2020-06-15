@@ -1,0 +1,62 @@
+stages:
+  - build
+  - stop_docker
+  - deploy
+
+develop_build:
+  stage: build
+  tags:
+    - develop
+  only:
+    - develop
+  script:
+    - docker build -t docker.lzyy.cn/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME .
+    
+master_build:
+  stage: build
+  tags:
+    - master
+  only:
+    - master
+  script:
+    - docker build -t docker.lzyy.cn/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME .
+
+develop_remove:
+  stage: stop_docker
+  tags:
+    - develop
+  only:
+    - develop
+  script:
+    - docker stop $CI_PROJECT_NAME
+    - docker rm -f $CI_PROJECT_NAME
+  allow_failure: true
+  
+master_remove:
+  stage: stop_docker
+  tags:
+    - master
+  only:
+    - master
+  script:
+    - docker stop $CI_PROJECT_NAME
+    - docker rm -f $CI_PROJECT_NAME
+  allow_failure: true
+
+develop_deploy:
+  stage: deploy
+  tags:
+    - develop
+  only:
+    - develop
+  script:
+    - docker run -d --name $CI_PROJECT_NAME docker.lzyy.cn/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
+    
+master_deploy:
+  stage: deploy
+  tags:
+    - master
+  only:
+    - master
+  script:
+    - docker run -d --name $CI_PROJECT_NAME docker.lzyy.cn/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
